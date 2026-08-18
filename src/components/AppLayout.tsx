@@ -14,6 +14,7 @@ import MyBookings from './bus/MyBookings';
 import CustomerProfile from './bus/CustomerProfile';
 import ForgotPassword from './bus/ForgotPassword';
 import AdminDashboard from './bus/admin/AdminDashboard';
+import PlatformAdminDashboard from './bus/platform-admin/PlatformAdminDashboard';
 import type { Trip } from './bus/data';
 import type { PermissionKey } from './bus/admin/adminData';
 import { toast } from 'sonner';
@@ -36,9 +37,11 @@ const seedNotifications = [
 ];
 
 function userToAppUser(u: AuthUser, livePerms?: string[]) {
-  const r = (u.role ?? '').toLowerCase();
-  const role: 'customer' | 'admin' | 'employee' =
-    r === 'company_admin' ? 'admin'
+  const r = (u.role ?? '').toLowerCase().replace('-', '_');
+  const isPlatformAdmin = r === 'platform_admin' || r === 'platformadmin';
+  const role: 'customer' | 'admin' | 'employee' | 'platform_admin' =
+    isPlatformAdmin ? 'platform_admin'
+    : r === 'company_admin' ? 'admin'
     : r === 'employee' ? 'employee'
     : 'customer';
   // Priority: live permissions fetched from API > permissions stored in AuthUser > empty
@@ -89,9 +92,9 @@ const AppLayout: React.FC = () => {
   const appUser = user ? userToAppUser(user, isEmployee ? (livePerms ?? user.permissions) : undefined) : null;
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Auto-redirect admins/employees to the admin panel on page load (handles refresh)
+  // Auto-redirect admins/employees/platform_admin to the right panel on page load
   useEffect(() => {
-    if (appUser && (appUser.appRole === 'admin' || appUser.appRole === 'employee')) {
+    if (appUser && (appUser.appRole === 'admin' || appUser.appRole === 'employee' || appUser.appRole === 'platform_admin')) {
       setView({ kind: 'admin' });
     }
   }, []);
@@ -134,7 +137,7 @@ const AppLayout: React.FC = () => {
   };
 
   const openAdmin = () => {
-    if (!appUser || (appUser.appRole !== 'admin' && appUser.appRole !== 'employee')) {
+    if (!appUser || (appUser.appRole !== 'admin' && appUser.appRole !== 'employee' && appUser.appRole !== 'platform_admin')) {
       toast.error('Admin access required');
       return;
     }
@@ -145,7 +148,10 @@ const AppLayout: React.FC = () => {
     setUser(authUser);
     setAuthModal(null);
     const au = userToAppUser(authUser);
-    if (au.appRole === 'admin' || au.appRole === 'employee') {
+    if (au.appRole === 'platform_admin') {
+      toast.success(`Welcome! Opening platform admin…`);
+      setTimeout(() => setView({ kind: 'admin' }), 400);
+    } else if (au.appRole === 'admin' || au.appRole === 'employee') {
       toast.success(`Welcome! Opening admin panel…`);
       setTimeout(() => setView({ kind: 'admin' }), 400);
     } else {
@@ -159,11 +165,22 @@ const AppLayout: React.FC = () => {
     toast.success('Signed out');
   };
 
-  // Admin is a full-screen experience
+  // Platform admin — full-screen experience
+  if (view.kind === 'admin' && appUser?.appRole === 'platform_admin') {
+    return (
+      <PlatformAdminDashboard
+        userName={appUser.displayName}
+        staffRole={(appUser as any).staffRole}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  // Company admin / employee — full-screen experience
   if (view.kind === 'admin' && appUser && (appUser.appRole === 'admin' || appUser.appRole === 'employee')) {
     return (
       <AdminDashboard
-        role={appUser.appRole}
+        role={appUser.appRole as 'admin' | 'employee'}
         userName={appUser.displayName}
         companyName={appUser.companyName}
         permissions={appUser.permissions}

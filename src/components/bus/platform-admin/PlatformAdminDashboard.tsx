@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   LayoutDashboard, Building2, DollarSign, CreditCard, Users,
-  Activity, LogOut, Menu, X, ChevronDown, Shield, Bell,
+  Activity, LogOut, Menu, ChevronDown, Shield, Bell,
+  BarChart2, Ticket, Megaphone, HeadphonesIcon, MapPin, Settings,
+  Wallet,
 } from 'lucide-react';
 import PlatformOverview from './PlatformOverview';
 import CompanyManagement from './CompanyManagement';
@@ -9,10 +11,20 @@ import PlatformFinance from './PlatformFinance';
 import SubscriptionPlans from './SubscriptionPlans';
 import PlatformStaffMgmt from './PlatformStaffMgmt';
 import PlatformAuditLog from './PlatformAuditLog';
+import AnalyticsDashboard from './AnalyticsDashboard';
+import BookingManagement from './BookingManagement';
+import CustomerManagement from './CustomerManagement';
+import PayoutManagement from './PayoutManagement';
+import AnnouncementsPanel from './AnnouncementsPanel';
+import SupportTickets from './SupportTickets';
+import StationRegistry from './StationRegistry';
+import PlatformSettingsPage from './PlatformSettingsPage';
 import { usePlatformStats } from '@/lib/platformAdminApi';
 
 type Section =
-  | 'overview' | 'companies' | 'finance' | 'plans' | 'staff' | 'audit';
+  | 'overview' | 'analytics' | 'companies' | 'bookings' | 'customers'
+  | 'finance' | 'payouts' | 'plans' | 'staff' | 'announcements'
+  | 'tickets' | 'stations' | 'settings' | 'audit';
 
 interface Props {
   userName: string;
@@ -20,40 +32,72 @@ interface Props {
   onLogout: () => void;
 }
 
-const NAV: { key: Section; label: string; icon: React.ReactNode; badge?: (stats: any) => string | null }[] = [
+type NavGroup = {
+  label: string;
+  items: {
+    key: Section;
+    label: string;
+    icon: React.ReactNode;
+    badge?: (stats: any) => string | null;
+  }[];
+};
+
+const NAV_GROUPS: NavGroup[] = [
   {
-    key: 'overview', label: 'Overview',
-    icon: <LayoutDashboard className="w-4 h-4" />,
+    label: 'Overview',
+    items: [
+      { key: 'overview',   label: 'Dashboard',      icon: <LayoutDashboard className="w-4 h-4" /> },
+      { key: 'analytics',  label: 'Analytics',       icon: <BarChart2 className="w-4 h-4" /> },
+    ],
   },
   {
-    key: 'companies', label: 'Companies',
-    icon: <Building2 className="w-4 h-4" />,
-    badge: (s) => s?.pendingCompanies > 0 ? String(s.pendingCompanies) : null,
+    label: 'Operators',
+    items: [
+      {
+        key: 'companies', label: 'Companies', icon: <Building2 className="w-4 h-4" />,
+        badge: (s) => s?.pendingCompanies > 0 ? String(s.pendingCompanies) : null,
+      },
+      { key: 'bookings',   label: 'Bookings',        icon: <Ticket className="w-4 h-4" /> },
+      { key: 'customers',  label: 'Customers',        icon: <Users className="w-4 h-4" /> },
+    ],
   },
   {
-    key: 'finance', label: 'Finance',
-    icon: <DollarSign className="w-4 h-4" />,
+    label: 'Finance',
+    items: [
+      { key: 'finance',   label: 'Revenue',           icon: <DollarSign className="w-4 h-4" /> },
+      { key: 'payouts',   label: 'Payouts',            icon: <Wallet className="w-4 h-4" /> },
+      { key: 'plans',     label: 'Subscription Plans', icon: <CreditCard className="w-4 h-4" /> },
+    ],
   },
   {
-    key: 'plans', label: 'Subscription Plans',
-    icon: <CreditCard className="w-4 h-4" />,
+    label: 'Platform',
+    items: [
+      { key: 'staff',         label: 'Platform Staff',  icon: <Shield className="w-4 h-4" /> },
+      { key: 'announcements', label: 'Announcements',   icon: <Megaphone className="w-4 h-4" /> },
+      { key: 'tickets',       label: 'Support Tickets', icon: <HeadphonesIcon className="w-4 h-4" /> },
+      { key: 'stations',      label: 'Station Registry',icon: <MapPin className="w-4 h-4" /> },
+    ],
   },
   {
-    key: 'staff', label: 'Platform Staff',
-    icon: <Users className="w-4 h-4" />,
-  },
-  {
-    key: 'audit', label: 'Audit Log',
-    icon: <Activity className="w-4 h-4" />,
+    label: 'System',
+    items: [
+      { key: 'audit',    label: 'Audit Log',    icon: <Activity className="w-4 h-4" /> },
+      { key: 'settings', label: 'Settings',     icon: <Settings className="w-4 h-4" /> },
+    ],
   },
 ];
 
+const SECTION_LABEL: Record<Section, string> = {
+  overview: 'Dashboard', analytics: 'Analytics', companies: 'Companies',
+  bookings: 'Bookings', customers: 'Customers', finance: 'Revenue',
+  payouts: 'Payouts', plans: 'Subscription Plans', staff: 'Platform Staff',
+  announcements: 'Announcements', tickets: 'Support Tickets',
+  stations: 'Station Registry', audit: 'Audit Log', settings: 'Settings',
+};
+
 const ROLE_LABEL: Record<string, string> = {
-  super_admin:  'Super Admin',
-  ops_manager:  'Ops Manager',
-  finance:      'Finance',
-  support:      'Support',
-  moderator:    'Moderator',
+  super_admin: 'Super Admin', ops_manager: 'Ops Manager',
+  finance: 'Finance', support: 'Support', moderator: 'Moderator',
 };
 
 const PlatformAdminDashboard: React.FC<Props> = ({ userName, staffRole, onLogout }) => {
@@ -74,19 +118,16 @@ const PlatformAdminDashboard: React.FC<Props> = ({ userName, staffRole, onLogout
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const navigateTo = (s: string) => setSection(s as Section);
+  const go = (s: Section) => { setSection(s); setMobileOpen(false); };
 
   const initials = userName
-    .split(' ')
-    .map((n) => n[0]?.toUpperCase() ?? '')
-    .slice(0, 2)
-    .join('');
+    .split(' ').map((n) => n[0]?.toUpperCase() ?? '').slice(0, 2).join('');
 
   const Sidebar = (
-    <aside className="flex flex-col h-full w-64 bg-slate-900 text-white">
+    <aside className="flex flex-col h-full w-64 bg-slate-900 text-white overflow-y-auto">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
-        <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10 shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
           <Shield className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -96,34 +137,45 @@ const PlatformAdminDashboard: React.FC<Props> = ({ userName, staffRole, onLogout
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        {NAV.map((item) => {
-          const badge = item.badge?.(stats);
-          const active = section === item.key;
-          return (
-            <button
-              key={item.key}
-              onClick={() => { setSection(item.key); setMobileOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition group
-                ${active
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-400 hover:text-white hover:bg-white/10'
-                }`}
-            >
-              <span className={active ? 'text-white' : 'text-slate-500 group-hover:text-white'}>{item.icon}</span>
-              <span className="flex-1 text-left">{item.label}</span>
-              {badge && (
-                <span className="ml-auto w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center font-bold">
-                  {badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      <nav className="flex-1 py-3 px-3 space-y-4">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label}>
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-3 mb-1">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const badge = item.badge?.(stats);
+                const active = section === item.key;
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => go(item.key)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition group
+                      ${active
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-white/8'
+                      }`}
+                  >
+                    <span className={active ? 'text-white' : 'text-slate-500 group-hover:text-white'}>
+                      {item.icon}
+                    </span>
+                    <span className="flex-1 text-left">{item.label}</span>
+                    {badge && (
+                      <span className="ml-auto w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center font-bold">
+                        {badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Bottom: user */}
-      <div className="border-t border-white/10 p-4">
+      {/* User */}
+      <div className="border-t border-white/10 p-4 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
             {initials}
@@ -161,17 +213,15 @@ const PlatformAdminDashboard: React.FC<Props> = ({ userName, staffRole, onLogout
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Section title */}
           <div className="flex-1">
             <h2 className="text-slate-800 font-semibold text-sm">
-              {NAV.find((n) => n.key === section)?.label ?? 'Platform Admin'}
+              {SECTION_LABEL[section]}
             </h2>
           </div>
 
-          {/* Pending companies badge */}
           {(stats?.pendingCompanies ?? 0) > 0 && (
             <button
-              onClick={() => setSection('companies')}
+              onClick={() => go('companies')}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-xs font-semibold hover:bg-amber-100 transition"
             >
               <Bell className="w-3.5 h-3.5" />
@@ -207,14 +257,22 @@ const PlatformAdminDashboard: React.FC<Props> = ({ userName, staffRole, onLogout
           </div>
         </header>
 
-        {/* Scrollable content area */}
+        {/* Scrollable content */}
         <main className="flex-1 overflow-y-auto p-6">
-          {section === 'overview'   && <PlatformOverview onNavigate={navigateTo} />}
-          {section === 'companies'  && <CompanyManagement />}
-          {section === 'finance'    && <PlatformFinance />}
-          {section === 'plans'      && <SubscriptionPlans />}
-          {section === 'staff'      && <PlatformStaffMgmt />}
-          {section === 'audit'      && <PlatformAuditLog />}
+          {section === 'overview'      && <PlatformOverview onNavigate={(s) => go(s as Section)} />}
+          {section === 'analytics'     && <AnalyticsDashboard />}
+          {section === 'companies'     && <CompanyManagement />}
+          {section === 'bookings'      && <BookingManagement />}
+          {section === 'customers'     && <CustomerManagement />}
+          {section === 'finance'       && <PlatformFinance />}
+          {section === 'payouts'       && <PayoutManagement />}
+          {section === 'plans'         && <SubscriptionPlans />}
+          {section === 'staff'         && <PlatformStaffMgmt />}
+          {section === 'announcements' && <AnnouncementsPanel />}
+          {section === 'tickets'       && <SupportTickets />}
+          {section === 'stations'      && <StationRegistry />}
+          {section === 'audit'         && <PlatformAuditLog />}
+          {section === 'settings'      && <PlatformSettingsPage />}
         </main>
       </div>
     </div>

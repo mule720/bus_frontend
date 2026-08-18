@@ -1596,3 +1596,271 @@ export function useLookupWalkInCustomer() {
     },
   });
 }
+
+// ── Company Dashboard ─────────────────────────────────────────────────────────
+
+export interface RouteRevenue { routeFrom: string; routeTo: string; revenue: number; ticketCount: number; }
+export interface StationRevenue { stationName: string; revenue: number; ticketCount: number; }
+export interface SellerStats { employeeName: string; ticketsSold: number; revenue: number; }
+export interface DashboardTrip {
+  id: string; routeFrom: string; routeTo: string; departureTime: string;
+  busNumber: string; status: string; availableSeats: number; totalSeats: number;
+  hasBus: boolean; hasDriver: boolean; hasConductor: boolean;
+  walkinCount: number; onlineCount: number; runStatus: string;
+}
+export interface DashboardAlert { severity: string; type: string; message: string; tripId?: string; }
+export interface CompanyDashboard {
+  revenueToday: number; revenueMonth: number;
+  ticketsToday: number; ticketsMonth: number;
+  cashToday: number; mobileToday: number; cardToday: number;
+  walkinToday: number; onlineToday: number;
+  tripsToday: number; tripsDeparted: number; tripsCompleted: number;
+  tripsNotStarted: number; tripsCancelled: number; avgOccupancyPct: number;
+  activeBuses: number; activeEmployees: number;
+  revenueByRoute: RouteRevenue[]; revenueByStation: StationRevenue[];
+  topSellers: SellerStats[]; trips: DashboardTrip[]; alerts: DashboardAlert[];
+}
+
+const COMPANY_DASHBOARD_QUERY = `
+  query CompanyDashboard($date: String) {
+    companyDashboard(date: $date) {
+      revenueToday revenueMonth ticketsToday ticketsMonth
+      cashToday mobileToday cardToday walkinToday onlineToday
+      tripsToday tripsDeparted tripsCompleted tripsNotStarted tripsCancelled avgOccupancyPct
+      activeBuses activeEmployees
+      revenueByRoute { routeFrom routeTo revenue ticketCount }
+      revenueByStation { stationName revenue ticketCount }
+      topSellers { employeeName ticketsSold revenue }
+      trips {
+        id routeFrom routeTo departureTime busNumber status
+        availableSeats totalSeats hasBus hasDriver hasConductor
+        walkinCount onlineCount runStatus
+      }
+      alerts { severity type message tripId }
+    }
+  }
+`;
+
+export function useCompanyDashboard(date?: string) {
+  return useQuery<CompanyDashboard | null>({
+    queryKey: ['company-dashboard', date ?? 'today'],
+    queryFn: async () => {
+      const data = await gql<{ companyDashboard: CompanyDashboard | null }>(
+        COMPANY_DASHBOARD_QUERY, { date: date ?? null }
+      );
+      return data.companyDashboard ?? null;
+    },
+    staleTime: 60_000,
+    enabled: !!localStorage.getItem('bus_jwt'),
+  });
+}
+
+// ── Station Dashboard ─────────────────────────────────────────────────────────
+
+export interface StationTripEntry {
+  tripId: string; routeFrom: string; routeTo: string; departureTime: string;
+  ticketsSold: number; revenue: number; isClosed: boolean;
+}
+export interface StationDashboard {
+  stationName: string; revenueToday: number; ticketsToday: number;
+  cashToday: number; mobileToday: number; walkinToday: number;
+  trips: StationTripEntry[];
+  topSellers: { employeeName: string; ticketsSold: number; revenue: number; }[];
+}
+
+export function useStationDashboard(date?: string) {
+  return useQuery<StationDashboard | null>({
+    queryKey: ['station-dashboard', date ?? 'today'],
+    queryFn: async () => {
+      const data = await gql<{ stationDashboard: StationDashboard | null }>(
+        `query StationDash($date: String) {
+          stationDashboard(date: $date) {
+            stationName revenueToday ticketsToday cashToday mobileToday walkinToday
+            trips { tripId routeFrom routeTo departureTime ticketsSold revenue isClosed }
+            topSellers { employeeName ticketsSold revenue }
+          }
+        }`,
+        { date: date ?? null }
+      );
+      return data.stationDashboard ?? null;
+    },
+    staleTime: 60_000,
+    enabled: !!localStorage.getItem('bus_jwt'),
+  });
+}
+
+// ── Conductor Dashboard ────────────────────────────────────────────────────────
+
+export interface ConductorDashboard {
+  tripId: string; routeFrom: string; routeTo: string; departureTime: string;
+  busRegistration?: string; runStatus: string; totalSeats: number;
+  boardedCount: number; confirmedCount: number; walkinRevenue: number; walkinCount: number;
+  passengers: {
+    bookingId: string; passengerName: string; fromStop: string; toStop: string;
+    seats: string[]; status: string; isWalkin: boolean;
+  }[];
+}
+
+export function useConductorDashboard(tripId: string | null, travelDate: string | null) {
+  return useQuery<ConductorDashboard | null>({
+    queryKey: ['conductor-dashboard', tripId, travelDate],
+    queryFn: async () => {
+      const data = await gql<{ conductorDashboard: ConductorDashboard | null }>(
+        `query ConductorDash($tripId: ID!, $travelDate: String!) {
+          conductorDashboard(tripId: $tripId, travelDate: $travelDate) {
+            tripId routeFrom routeTo departureTime busRegistration runStatus
+            totalSeats boardedCount confirmedCount walkinRevenue walkinCount
+            passengers { bookingId passengerName fromStop toStop seats status isWalkin }
+          }
+        }`,
+        { tripId, travelDate }
+      );
+      return data.conductorDashboard ?? null;
+    },
+    staleTime: 30_000,
+    enabled: !!tripId && !!travelDate,
+  });
+}
+
+// ── Platform Stats (proxy via company schema context) ─────────────────────────
+
+export interface PlatformStats {
+  totalCompanies: number; pendingCompanies: number; activeCompanies: number;
+  suspendedCompanies: number; totalTrips: number; activeTrips: number;
+  totalBookings: number; confirmedBookings: number; revenueTotal: number;
+}
+
+export function usePlatformStats() {
+  return useQuery<PlatformStats | null>({
+    queryKey: ['platform-stats'],
+    queryFn: async () => {
+      const data = await gql<{ platformStats: PlatformStats | null }>(
+        `{ platformStats {
+            totalCompanies pendingCompanies activeCompanies suspendedCompanies
+            totalTrips activeTrips totalBookings confirmedBookings revenueTotal
+          } }`
+      );
+      return data.platformStats ?? null;
+    },
+    staleTime: 120_000,
+    enabled: !!localStorage.getItem('bus_jwt'),
+  });
+}
+
+// ── Station Expenses ───────────────────────────────────────────────────────────
+
+export interface StationExpense {
+  id: string;
+  expenseType: string;
+  amount: number;
+  description: string;
+  expenseDate: string;
+  status: string;
+  stationName: string | null;
+  loggedByName: string;
+  recipientName: string | null;
+  recipientConfirmed: boolean;
+  recipientConfirmedAt: string | null;
+  approvedAt: string | null;
+  rejectionReason: string;
+  createdAt: string;
+}
+
+export interface ShiftSupplement {
+  id: string;
+  shiftId: string;
+  shiftDate: string;
+  amount: number;
+  notes: string;
+  status: string;
+  collectedByName: string | null;
+  collectedAt: string | null;
+  approvedAt: string | null;
+  createdAt: string;
+}
+
+const STATION_EXPENSE_FIELDS = `
+  id expenseType amount description expenseDate status stationName
+  loggedByName recipientName recipientConfirmed recipientConfirmedAt
+  approvedAt rejectionReason createdAt
+`;
+
+const SUPPLEMENT_FIELDS = `
+  id shiftId shiftDate amount notes status
+  collectedByName collectedAt approvedAt createdAt
+`;
+
+export function useMyStationExpenses(dateFrom?: string, dateTo?: string) {
+  return useQuery<StationExpense[]>({
+    queryKey: ['myStationExpenses', dateFrom, dateTo],
+    queryFn: async () => {
+      const data = await gql<{ myStationExpenses: StationExpense[] }>(
+        `query MyStationExpenses($dateFrom: String, $dateTo: String) {
+           myStationExpenses(dateFrom: $dateFrom, dateTo: $dateTo) { ${STATION_EXPENSE_FIELDS} }
+         }`,
+        { dateFrom, dateTo },
+      );
+      return data.myStationExpenses ?? [];
+    },
+  });
+}
+
+export function usePendingStationExpenses() {
+  return useQuery<StationExpense[]>({
+    queryKey: ['pendingStationExpenses'],
+    queryFn: async () => {
+      const data = await gql<{ pendingStationExpenses: StationExpense[] }>(
+        `{ pendingStationExpenses { ${STATION_EXPENSE_FIELDS} } }`,
+      );
+      return data.pendingStationExpenses ?? [];
+    },
+  });
+}
+
+export function useMyPendingReceipts() {
+  return useQuery<StationExpense[]>({
+    queryKey: ['myPendingReceipts'],
+    queryFn: async () => {
+      const data = await gql<{ myPendingReceipts: StationExpense[] }>(
+        `{ myPendingReceipts { ${STATION_EXPENSE_FIELDS} } }`,
+      );
+      return data.myPendingReceipts ?? [];
+    },
+  });
+}
+
+export function useMyShiftSupplements() {
+  return useQuery<ShiftSupplement[]>({
+    queryKey: ['myShiftSupplements'],
+    queryFn: async () => {
+      const data = await gql<{ myShiftSupplements: ShiftSupplement[] }>(
+        `{ myShiftSupplements { ${SUPPLEMENT_FIELDS} } }`,
+      );
+      return data.myShiftSupplements ?? [];
+    },
+  });
+}
+
+export function usePendingShiftSupplements() {
+  return useQuery<ShiftSupplement[]>({
+    queryKey: ['pendingShiftSupplements'],
+    queryFn: async () => {
+      const data = await gql<{ pendingShiftSupplements: ShiftSupplement[] }>(
+        `{ pendingShiftSupplements { ${SUPPLEMENT_FIELDS} } }`,
+      );
+      return data.pendingShiftSupplements ?? [];
+    },
+  });
+}
+
+export function useStationPendingSupplements() {
+  return useQuery<ShiftSupplement[]>({
+    queryKey: ['stationPendingSupplements'],
+    queryFn: async () => {
+      const data = await gql<{ stationPendingSupplements: ShiftSupplement[] }>(
+        `{ stationPendingSupplements { ${SUPPLEMENT_FIELDS} } }`,
+      );
+      return data.stationPendingSupplements ?? [];
+    },
+  });
+}

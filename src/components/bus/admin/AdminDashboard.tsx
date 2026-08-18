@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   LayoutDashboard, Bus, Users, BarChart3, LogOut, X, Building2, Settings,
   ShoppingCart, ScanLine, Menu, Search, MapPin, Grid3x3, UserCog, CreditCard,
-  ChevronDown, ChevronRight, User,
+  ChevronDown, ChevronRight, User, Wallet,
 } from 'lucide-react';
 import DashboardOverview from './DashboardOverview';
 import TripManagement from './TripManagement';
@@ -16,6 +16,7 @@ import StationManagement from './StationManagement';
 import SeatAvailability from './SeatAvailability';
 import TripStaffing from './TripStaffing';
 import Subscription from './Subscription';
+import Reconciliation from './Reconciliation';
 import type { PermissionKey } from './adminData';
 import type { CompanyEmployeeFull } from '@/lib/api';
 
@@ -33,7 +34,7 @@ interface Props {
 type Section =
   | 'overview' | 'pos' | 'scanner' | 'trips' | 'seat-avail'
   | 'trip-staffing' | 'customers' | 'employees' | 'buses'
-  | 'stations' | 'reports' | 'subscription';
+  | 'stations' | 'reports' | 'reconciliation' | 'subscription';
 
 const AdminDashboard: React.FC<Props> = ({ role, userName, companyName, permissions, onExit, onLogout }) => {
   const [section, setSection] = useState<Section>('overview');
@@ -92,7 +93,8 @@ const AdminDashboard: React.FC<Props> = ({ role, userName, companyName, permissi
     {
       label: 'Analytics',
       items: [
-        { id: 'reports'       as Section, label: 'Reports',           icon: BarChart3,       show: hasPerm('view_reports') },
+        { id: 'reports'        as Section, label: 'Reports',           icon: BarChart3, show: hasPerm('view_reports') },
+        { id: 'reconciliation' as Section, label: 'Reconciliation',    icon: Wallet,    show: hasPerm('view_reports') || hasPerm('sell_tickets') || hasPerm('walk_in_sales') || hasPerm('scan_tickets') },
       ].filter((i) => i.show),
     },
     {
@@ -316,7 +318,8 @@ const AdminDashboard: React.FC<Props> = ({ role, userName, companyName, permissi
               } : undefined}
             />
           )}
-          {section === 'reports'       && <Reports />}
+          {section === 'reports'        && <Reports />}
+          {section === 'reconciliation' && <Reconciliation />}
           {section === 'subscription'  && <Subscription />}
         </div>
       </main>

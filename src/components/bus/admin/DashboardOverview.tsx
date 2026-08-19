@@ -5,6 +5,7 @@ import {
   TrendingUp, BarChart2, User, Building2, CheckCircle2, XCircle,
   ArrowUpRight, Navigation, RefreshCw,
 } from 'lucide-react';
+import OnboardingChecklist from '@/components/OnboardingChecklist';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -171,6 +172,7 @@ const CompanyAdminView: React.FC<{ date: string; onNavigate?: (s: string) => voi
 
   return (
     <div className="space-y-6">
+      <OnboardingChecklist />
       <AlertStrip alerts={data.alerts} />
 
       <Section title="Revenue">

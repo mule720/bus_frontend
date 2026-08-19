@@ -1864,3 +1864,39 @@ export function useStationPendingSupplements() {
     },
   });
 }
+
+// ── Onboarding status ─────────────────────────────────────────────────────────
+
+export interface OnboardingStatusData {
+  accountCreated: boolean;
+  emailVerified: boolean;
+  logoAdded: boolean;
+  busAdded: boolean;
+  employeeAdded: boolean;
+  tripCreated: boolean;
+  subscribed: boolean;
+}
+
+export function useOnboardingStatus() {
+  return useQuery<OnboardingStatusData>({
+    queryKey: ['onboardingStatus'],
+    queryFn: async () => {
+      const data = await gql<{ companyOnboardingStatus: OnboardingStatusData }>(
+        `query OnboardingStatus {
+           companyOnboardingStatus {
+             accountCreated
+             emailVerified
+             logoAdded
+             busAdded
+             employeeAdded
+             tripCreated
+             subscribed
+           }
+         }`,
+      );
+      return data.companyOnboardingStatus;
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+}

@@ -94,7 +94,7 @@ const AdminDashboard: React.FC<Props> = ({ role, userName, companyName, permissi
       label: 'Analytics',
       items: [
         { id: 'reports'        as Section, label: 'Reports',           icon: BarChart3, show: hasPerm('view_reports') },
-        { id: 'reconciliation' as Section, label: 'Reconciliation',    icon: Wallet,    show: hasPerm('view_reports') || hasPerm('sell_tickets') || hasPerm('walk_in_sales') || hasPerm('scan_tickets') },
+        { id: 'reconciliation' as Section, label: 'Reconciliation',    icon: Wallet,    show: hasPerm('view_reports') || hasPerm('sell_tickets') || hasPerm('walk_in_sales') || hasPerm('scan_tickets') || hasPerm('reconcile_cash') },
       ].filter((i) => i.show),
     },
     {

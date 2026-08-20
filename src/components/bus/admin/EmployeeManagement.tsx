@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Plus, X, Loader2, Users, ShoppingCart, QrCode, Bus, Grid3x3,
   BarChart3, Search, UserPlus, Truck, MapPin, CreditCard, Shield,
-  ChevronRight, Eye, EyeOff, Check,
+  ChevronRight, Eye, EyeOff, Check, XCircle, DollarSign, Bell,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -13,15 +13,22 @@ import {
 } from '@/lib/api';
 
 const ALL_PERMISSIONS = [
+  // ── Operations ────────────────────────────────────────────────────────────
   { key: 'sell_tickets',        label: 'Point of Sale',                  Icon: ShoppingCart },
   { key: 'scan_tickets',        label: 'Boarding Scanner',               Icon: QrCode },
+  { key: 'cancel_bookings',     label: 'Cancel Bookings',                Icon: XCircle },
+  { key: 'reconcile_cash',      label: 'Cash Reconciliation',            Icon: DollarSign },
+  { key: 'manage_notifications',label: 'Send Notifications',             Icon: Bell },
+  // ── Trip & Fleet ──────────────────────────────────────────────────────────
   { key: 'create_trips',        label: 'Trip Management',                Icon: Bus },
   { key: 'manage_seats',        label: 'Seat Availability',              Icon: Grid3x3 },
+  { key: 'manage_buses',        label: 'Fleet Management',               Icon: Truck },
+  { key: 'manage_trip_staff',   label: 'Trip Staffing',                  Icon: Users },
+  // ── Reporting & Customers ─────────────────────────────────────────────────
   { key: 'view_reports',        label: 'Sales & Reports',                Icon: BarChart3 },
   { key: 'manage_customers',    label: 'Customer Lookup',                Icon: Search },
+  // ── Admin ─────────────────────────────────────────────────────────────────
   { key: 'manage_employees',    label: 'Staff Management',               Icon: UserPlus },
-  { key: 'manage_trip_staff',   label: 'Trip Staffing',                  Icon: Users },
-  { key: 'manage_buses',        label: 'Fleet Management',               Icon: Truck },
   { key: 'manage_stations',     label: 'Station Management',             Icon: MapPin },
   { key: 'manage_subscription', label: 'Subscription',                   Icon: CreditCard },
   { key: 'super_user',          label: 'Super User (all access)',        Icon: Shield },

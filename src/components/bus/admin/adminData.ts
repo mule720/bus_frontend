@@ -23,6 +23,9 @@ export type PermissionKey =
   | 'sell_tickets'
   | 'walk_in_sales'
   | 'scan_tickets'
+  | 'cancel_bookings'
+  | 'reconcile_cash'
+  | 'manage_notifications'
   | 'create_trips'
   | 'manage_seats'
   | 'view_reports'
@@ -35,19 +38,22 @@ export type PermissionKey =
   | 'super_user';
 
 export const PERMISSION_LABELS: Record<PermissionKey, { label: string; desc: string }> = {
-  sell_tickets:        { label: 'Point of Sale',     desc: 'Walk-in POS ticket sales' },
-  walk_in_sales:       { label: 'Walk-in Sales',     desc: 'Legacy POS permission key' },
-  scan_tickets:        { label: 'Ticket Scanner',    desc: 'Scan and board passengers' },
-  create_trips:        { label: 'Trip Management',   desc: 'Schedule and manage trips' },
-  manage_seats:        { label: 'Seat Availability', desc: 'View seat maps and close sales' },
-  view_reports:        { label: 'Sales & Reports',   desc: 'Access revenue and sales data' },
-  manage_customers:    { label: 'Customer Lookup',   desc: 'Search bookings and reprint tickets' },
-  manage_employees:    { label: 'Staff Management',  desc: 'Create and manage staff accounts' },
-  manage_trip_staff:   { label: 'Trip Staffing',     desc: 'Assign sellers, bus and driver per trip' },
-  manage_buses:        { label: 'Fleet Management',  desc: 'Register and update buses' },
-  manage_stations:     { label: 'Station Management',desc: 'Create and edit departure stations' },
-  manage_subscription: { label: 'Subscription',      desc: 'Manage company subscription' },
-  super_user:          { label: 'Super User',        desc: 'Full access to all features' },
+  sell_tickets:          { label: 'Point of Sale',         desc: 'Walk-in POS ticket sales' },
+  walk_in_sales:         { label: 'Walk-in Sales',         desc: 'Legacy POS permission key' },
+  scan_tickets:          { label: 'Ticket Scanner',        desc: 'Scan and board passengers' },
+  cancel_bookings:       { label: 'Cancel Bookings',       desc: 'Cancel any booking on company trips' },
+  reconcile_cash:        { label: 'Cash Reconciliation',   desc: 'Record cash collected for walk-in bookings' },
+  manage_notifications:  { label: 'Send Notifications',    desc: 'Send announcements and alerts to passengers' },
+  create_trips:          { label: 'Trip Management',       desc: 'Schedule and manage trips' },
+  manage_seats:          { label: 'Seat Availability',     desc: 'View seat maps and close sales' },
+  view_reports:          { label: 'Sales & Reports',       desc: 'Access revenue and sales data' },
+  manage_customers:      { label: 'Customer Lookup',       desc: 'Search bookings and reprint tickets' },
+  manage_employees:      { label: 'Staff Management',      desc: 'Create and manage staff accounts' },
+  manage_trip_staff:     { label: 'Trip Staffing',         desc: 'Assign sellers, bus and driver per trip' },
+  manage_buses:          { label: 'Fleet Management',      desc: 'Register and update buses' },
+  manage_stations:       { label: 'Station Management',    desc: 'Create and edit departure stations' },
+  manage_subscription:   { label: 'Subscription',          desc: 'Manage company subscription' },
+  super_user:            { label: 'Super User',            desc: 'Full access to all features' },
 };
 
 export interface Employee {

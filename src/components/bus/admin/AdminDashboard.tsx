@@ -132,7 +132,7 @@ const AdminDashboard: React.FC<Props> = ({ role, userName, companyName, permissi
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="font-bold text-white text-sm truncate max-w-[130px]">{companyName ?? 'BusGo'}</div>
+              <div className="font-bold text-white text-sm truncate max-w-[130px]">{companyName ?? 'GooAfri'}</div>
               <div className="text-[10px] text-slate-500 uppercase tracking-wider">Operator portal</div>
             </div>
           </div>
@@ -248,7 +248,7 @@ const AdminDashboard: React.FC<Props> = ({ role, userName, companyName, permissi
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-50">
                   <div className="px-4 py-3 border-b border-slate-100">
                     <div className="font-semibold text-slate-900 truncate">{userName}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{companyName ?? 'BusGo'}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{companyName ?? 'GooAfri'}</div>
                     <div className="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">
                       {isAdmin ? 'Company Admin' : 'Employee'}
                     </div>

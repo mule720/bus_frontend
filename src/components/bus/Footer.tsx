@@ -25,7 +25,7 @@ const Footer: React.FC = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-700 to-blue-900 rounded-xl flex items-center justify-center">
                 <Bus className="w-6 h-6 text-white" />
               </div>
-              <span className="font-bold text-xl text-white">BusGo</span>
+              <span className="font-bold text-xl text-white">GooAfri</span>
             </div>
             <p className="text-sm text-slate-400 mb-4 max-w-sm">
               The smartest way to book bus tickets. Compare 250+ operators, 12,000+ routes, and travel with confidence.
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-slate-500">© 2026 BusGo Inc. All rights reserved.</p>
+          <p className="text-xs text-slate-500">© 2026 GooAfri Inc. All rights reserved.</p>
           <div className="flex gap-3">
             {[Facebook, Twitter, Instagram, Youtube].map((Ic, i) => (
               <a key={i} href="#" onClick={(e) => e.preventDefault()} className="w-9 h-9 rounded-lg bg-slate-900 hover:bg-blue-700 flex items-center justify-center transition">

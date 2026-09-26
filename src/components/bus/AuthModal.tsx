@@ -81,7 +81,7 @@ const AuthModal: React.FC<Props> = ({ mode: initialMode, onClose, onSuccess, onF
             <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
               <Bus className="w-6 h-6" />
             </div>
-            <span className="font-bold text-lg">BusGo</span>
+            <span className="font-bold text-lg">GooAfri</span>
           </div>
           <h2 className="text-2xl font-bold">{mode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
           <p className="text-blue-100 text-sm mt-1">

@@ -60,7 +60,7 @@ const PlatformOverview: React.FC<Props> = ({ onNavigate }) => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Platform Overview</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Live metrics across all operators on BusGo</p>
+          <p className="text-slate-500 text-sm mt-0.5">Live metrics across all operators on GooAfri</p>
         </div>
         <button
           onClick={() => refetchStats()}

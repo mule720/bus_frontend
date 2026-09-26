@@ -32,7 +32,7 @@ type View =
   | { kind: 'admin' };
 
 const seedNotifications = [
-  { id: 'n1', type: 'success' as const, title: 'Welcome to BusGo!', body: 'Book your first trip and save with promo BUS10.', time: 'Just now', read: false },
+  { id: 'n1', type: 'success' as const, title: 'Welcome to GooAfri!', body: 'Book your first trip and save with promo BUS10.', time: 'Just now', read: false },
   { id: 'n2', type: 'info' as const, title: 'Track your trip', body: 'Enable notifications to get real-time bus updates.', time: '2h ago', read: false },
 ];
 

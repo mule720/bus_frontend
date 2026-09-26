@@ -131,7 +131,7 @@ const PlatformAdminDashboard: React.FC<Props> = ({ userName, staffRole, onLogout
           <Shield className="w-5 h-5 text-white" />
         </div>
         <div>
-          <p className="font-bold text-sm">BusGo Admin</p>
+          <p className="font-bold text-sm">GooAfri Admin</p>
           <p className="text-slate-400 text-xs">Platform Control</p>
         </div>
       </div>

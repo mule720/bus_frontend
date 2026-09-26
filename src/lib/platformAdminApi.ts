@@ -1,6 +1,6 @@
 /**
  * Platform Admin API — GraphQL queries + mutations + React Query hooks
- * for the BusGo platform operator dashboard.
+ * for the GooAfri platform operator dashboard.
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gql } from './graphql';

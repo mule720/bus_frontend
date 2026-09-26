@@ -33,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({
               <Bus className="w-6 h-6 text-white" />
             </div>
             <div>
-              <div className="font-bold text-xl text-slate-900 leading-none">BusGo</div>
+              <div className="font-bold text-xl text-slate-900 leading-none">GooAfri</div>
               <div className="text-[10px] text-slate-500 uppercase tracking-wider">Travel Smart</div>
             </div>
           </div>

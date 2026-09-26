@@ -14,7 +14,7 @@ const Features: React.FC = () => (
   <section className="py-20 bg-white">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
-        <span className="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full mb-3 uppercase tracking-wider">Why BusGo</span>
+        <span className="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full mb-3 uppercase tracking-wider">Why GooAfri</span>
         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">Built for travelers, trusted by millions</h2>
         <p className="text-slate-600 max-w-2xl mx-auto">Everything you need for stress-free bus travel, all in one app.</p>
       </div>

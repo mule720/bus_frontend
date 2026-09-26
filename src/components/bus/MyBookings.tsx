@@ -73,7 +73,7 @@ function TicketModal({ booking, onClose }: { booking: Booking; onClose: () => vo
         .footer{text-align:center;font-size:11px;color:#64748b;margin-top:16px}
       </style></head>
       <body>
-      <h2>🚌 BusGo E-Ticket</h2>
+      <h2>🚌 GooAfri E-Ticket</h2>
       <div class="row"><span>Company</span><span>${booking.company}</span></div>
       <div class="row"><span>Route</span><span>${booking.from} → ${booking.to}</span></div>
       <div class="row"><span>Date</span><span>${booking.date}</span></div>

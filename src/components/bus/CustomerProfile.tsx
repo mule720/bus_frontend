@@ -291,7 +291,7 @@ const CustomerProfile: React.FC<Props> = ({ user, onClose, onLogout }) => {
             <div>
               <h3 className="font-bold text-slate-900 text-lg mb-4">Terms & Privacy</h3>
               <div className="text-sm text-slate-600 space-y-3">
-                <p>By using BusGo, you agree to our Terms of Service and Privacy Policy.</p>
+                <p>By using GooAfri, you agree to our Terms of Service and Privacy Policy.</p>
                 <p>We collect only the information necessary to process your bookings: name, contact details, and payment references. We never sell your personal data.</p>
                 <p>Cancellation policy: full refund if cancelled 24h+ before departure; 50% refund within 24h; no refund for no-shows.</p>
                 <p>For the full terms, contact support@busgo.com.</p>
